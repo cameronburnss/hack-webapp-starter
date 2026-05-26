@@ -4,6 +4,7 @@ import { z } from "zod";
 import { catalog } from "@/lib/catalog-store";
 import { enrichProducts } from "@/lib/enrichment";
 import { RawProductSchema, type EnrichedProduct, type RawProduct } from "@/lib/schemas";
+import { scrapeWayfairUrls } from "@/lib/scrape";
 
 export const maxDuration = 300;
 
@@ -31,20 +32,21 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 
-  const raws: RawProduct[] = body.rawProducts ?? [];
+  const raws: RawProduct[] = [...(body.rawProducts ?? [])];
 
   if (body.urls?.length) {
-    // STUB: the scrape tab will commit lib/scrape.ts with scrapeWayfairUrls.
-    // Once that lands, import it and call here:
-    //   const scraped = await scrapeWayfairUrls(body.urls);
-    //   raws = [...raws, ...scraped];
-    return NextResponse.json(
-      {
-        error:
-          "URL → enrichment not yet wired. lib/scrape.ts pending from scrape tab. For now, pass rawProducts directly.",
-      },
-      { status: 501 },
-    );
+    try {
+      const scraped = await scrapeWayfairUrls(body.urls);
+      raws.push(...scraped);
+    } catch (err) {
+      return NextResponse.json(
+        {
+          error: "Scrape failed",
+          details: err instanceof Error ? err.message : String(err),
+        },
+        { status: 502 },
+      );
+    }
   }
 
   if (raws.length === 0) {
