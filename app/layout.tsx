@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hackathon Starter — Subconscious Agents",
+  title: "Wayfair Catalog Enrichment",
   description:
-    "Chat and long-running agents powered by Subconscious, Vercel AI SDK, Baseten, and Cloudflare.",
+    "Brand-side catalog enrichment for agentic commerce. Wayfair PDPs in, conversational enriched product data out.",
 };
 
 export default function RootLayout({
